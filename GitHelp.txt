@@ -14,11 +14,6 @@ Workflow
 		git commit -m "This is where the comment goes"
 	To view the logs
 		git log
-MAKE SURE main is checked out (git checkout main) before merging
-	Merging the branch when feature is done
-		git merge <featureBranchName> -m "Merging comments"
-	THEN check the logs again to make sure
-		git log
 
 Merge Conflicts - the necessity for Pull Requests
 
