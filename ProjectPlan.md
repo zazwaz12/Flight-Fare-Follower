@@ -54,6 +54,22 @@ Here is a sample solution architecture diagram:
 
 How is your project broken down? Who is doing what?
 
+- Justin:
+  - setup for api call of flight data (1/15, done)
+  - extract and load part of flight data (1/15)
+  - docker (TODO: 1/18)
+  - transform (TODO: 1/18)
+- Tim:
+  - setup for api call of exchange rate data (1/15, done)
+  - logging (TODO: 1/18)
+  - unit tests (TODO: 1/18)
+  - transform (TODO: 1/18)
+- Ahmed:
+  - setup for api call of oil prices (1/15, done)
+  - extract and load of oil price and/or exchange rate data (TODO: 1/18)
+  - transform (TODO: 1/18)
+  - AWS (TODO: later)
+
 We recommend using a free Task board such as [Trello](https://trello.com/). This makes it easy to assign and track tasks to each individual.
 
 Example:
