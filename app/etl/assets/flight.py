@@ -25,7 +25,7 @@ def extract_load_flights(
     days_later_120 = current_date + timedelta(days=120)
     days_later_120_formatted = days_later_120.strftime("%Y-%m-%d")
     duration_from = 9
-    duration_to = 15
+    duration_to = 9#15
 
     flight_data = []
     for code in df_airport_codes["airport_code"]:
@@ -50,7 +50,7 @@ def extract_load_flights(
                     for entry in flight_response_data
                 ]
             )
-            time.sleep(2)  # Pausing for 2 seconds between each API call
+            time.sleep(1)  # Pausing for a seconds between each API call
 
     df_flights = pd.json_normalize(flight_data)
     postgresql_client.upsert(
