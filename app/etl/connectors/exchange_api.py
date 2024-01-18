@@ -22,7 +22,7 @@ class ExchangeApiClient:
             # Use json_normalize to flatten the nested structure
             df_normalized = pd.json_normalize(data["exchange_rates"])
             # Use pd.melt to reshape the DataFrame - pivots on currency
-            melted_df = pd.melt(df_normalized, var_name="currencyCode", value_name="Value")
+            melted_df = pd.melt(df_normalized, var_name="currencyCode", value_name="value")
             return melted_df
         except requests.exceptions.RequestException as e:
             print(f"Error fetching exchange rates: {e}")

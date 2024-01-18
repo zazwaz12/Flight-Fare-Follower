@@ -14,13 +14,13 @@ def run_pipeline():
     DB_USERNAME = os.environ.get("DB_USERNAME")
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
     SERVER_NAME = os.environ.get("SERVER_NAME")
-    DATABASE_NAME_EXCHANGE = os.environ.get("DATABASE_NAME_EXCHANGE")
+    DATABASE_NAME_EXCHANGE = os.environ.get("DATABASE_NAME")
     PORT = os.environ.get("PORT")
 
     try:
-        print("Creating Amadeus API client")
+        print("Creating Exchange API client")
         exchange_api_client = ExchangeApiClient(
-            client_id=EXCHANGE_KEY
+            api_key=EXCHANGE_KEY
         )
         postgresql_client = PostgreSqlClient(
             server_name=SERVER_NAME,
@@ -35,8 +35,8 @@ def run_pipeline():
             metadata,
             Column("viewedAt", String, primary_key=True),
             Column("currencyCode", String, primary_key=True),
-            Column("airport", String, primary_key=True),
-            Column("value", Float, primary_key=True),
+            Column("airportCode", String, primary_key=False),
+            Column("value", Float, primary_key=False),
         )
         print("Extracting and loading data from ExchangeAPI ")
         extract_load_airport_currencies(
