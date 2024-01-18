@@ -1,0 +1,5 @@
+name: exchange_etl
+config:
+  airport_currency_reference_path: "./etl/data/currency/airport_code_currency_mapping.csv"
+schedule:
+  run_time: "10:30"
