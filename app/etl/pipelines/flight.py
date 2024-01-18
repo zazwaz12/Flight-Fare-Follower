@@ -8,7 +8,10 @@ import yaml
 from pathlib import Path
 import schedule
 import time
+import logging
+import pdb
 
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def run_pipeline():
     API_KEY = os.environ.get("API_KEY")
