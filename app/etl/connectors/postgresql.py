@@ -33,6 +33,9 @@ class PostgreSqlClient:
 
         self.engine = create_engine(connection_url)
 
+    def get_engine(self):
+        return self.engine
+
     def execute_sql(self, sql: str) -> None:
         self.engine.execute(sql)
 

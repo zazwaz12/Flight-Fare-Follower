@@ -12,30 +12,59 @@ import logging
 import pdb
 from etl.assets.pipeline_logging import PipelineLogging
 
-# logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# logging.basicConfig(level=print, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def run_pipeline(pipeline_config: dict):
+    load_dotenv()
+
     API_KEY = os.environ.get("API_KEY")
     API_SECRET_KEY = os.environ.get("API_SECRET_KEY")
+
     DB_USERNAME = os.environ.get("DB_USERNAME")
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
     SERVER_NAME = os.environ.get("SERVER_NAME")
-    DATABASE_NAME = os.environ.get("DATABASE_NAME")
     PORT = os.environ.get("PORT")
+    DATABASE_NAME = os.environ.get("DATABASE_NAME")
+
+    postgresql_client = PostgreSqlClient(
+        server_name=SERVER_NAME,
+        database_name=DATABASE_NAME,
+        username=DB_USERNAME,
+        password=DB_PASSWORD,
+        port=PORT,
+    )
+
+    # get config variables
+    yaml_file_path = __file__.replace(".py", ".yaml")
+    if Path(yaml_file_path).exists():
+        with open(yaml_file_path) as yaml_file:
+            pipeline_config = yaml.safe_load(yaml_file)
+            PIPELINE_NAME = pipeline_config.get("name")
+
+            flightLogger = PipelineLogging(
+                pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
+            )
+            flightLogger.log_message(
+                print,
+                message="The logging is set up on flight.py",
+                process="Logging Set-UP",
+                output="SUCCESS.",
+            )
+    else:
+        raise Exception(
+            f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
+        )
 
     try:
+        DATABASE_NAME = os.environ.get("DB_LOG_FLIGHT_NAME")
+
         print("Creating Amadeus API client")
+
         flight_api_client = FlightApiClient(
             client_id=API_KEY, client_secret=API_SECRET_KEY
         )
-        postgresql_client = PostgreSqlClient(
-            server_name=SERVER_NAME,
-            database_name=DATABASE_NAME,
-            username=DB_USERNAME,
-            password=DB_PASSWORD,
-            port=PORT,
-        )
+
         metadata = MetaData()
         table = Table(
             "flight_price",
@@ -49,6 +78,7 @@ def run_pipeline(pipeline_config: dict):
             Column("cheapestPrice", String),
         )
         print("Extracting and loading data from Amadeus API")
+
         extract_load_flights(
             flight_api_client=flight_api_client,
             postgresql_client=postgresql_client,
@@ -61,45 +91,3 @@ def run_pipeline(pipeline_config: dict):
         print("Pipeline run successful")
     except BaseException as e:
         print(f"Pipeline run failed. See detailed logs: {e}")
-
-
-if __name__ == "__main__":
-    load_dotenv()
-    from sqlalchemy.engine import URL
-
-    LOGGING_CONNECTION_URL = URL.create(
-        drivername="postgresql+pg8000",
-        username=os.environ.get("DB_USERNAME"),
-        password=os.environ.get("DB_PASSWORD"),
-        host=os.environ.get("SERVER_NAME"),
-        port=os.environ.get("PORT"),
-        database=os.environ.get("DB_LOG_FLIGHT_NAME"),
-    )
-
-    # get config variables
-    yaml_file_path = __file__.replace(".py", ".yaml")
-    if Path(yaml_file_path).exists():
-        with open(yaml_file_path) as yaml_file:
-            pipeline_config = yaml.safe_load(yaml_file)
-            PIPELINE_NAME = pipeline_config.get("name")
-
-            flightLogger = PipelineLogging(PIPELINE_NAME, LOGGING_CONNECTION_URL)
-            flightLogger.log_message(
-                logging.INFO,
-                message="The logging is set up on flight.py",
-                process="Logging Set-UP",
-                output="SUCCESS.",
-            )
-    else:
-        raise Exception(
-            f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
-        )
-
-    run_pipeline(pipeline_config=pipeline_config)
-    # set schedule
-    # schedule.every.day.at(
-    #     pipeline_config.get("schedule").get("run_time"), "Australia/Sydney"
-    # ).do(run_pipeline)
-
-    # while True:
-    #     schedule.run_pending()

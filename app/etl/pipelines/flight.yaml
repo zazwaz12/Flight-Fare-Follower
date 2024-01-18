@@ -1,4 +1,4 @@
-name: flight_etl
+name: flight
 config:
   airport_code_reference_path: "./etl/data/flight/destinations.csv"
 schedule:
