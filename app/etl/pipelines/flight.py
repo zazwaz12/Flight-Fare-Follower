@@ -12,7 +12,7 @@ import logging
 import pdb
 from etl.assets.pipeline_logging import PipelineLogging
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+#logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def run_pipeline():
     API_KEY = os.environ.get("API_KEY")

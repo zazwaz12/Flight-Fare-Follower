@@ -28,21 +28,26 @@ class LogEntry(Base):
     process = Column(String)
     log_level = Column(String)
     message = Column(String)
+    output = Column(String)
 
 
 
 class PipelineLogging:
     def __init__(self, pipeline_name: str, db_uri):
         self.pipeline_name = pipeline_name
-        #This is not good practice
         self.db_uri = db_uri
         self.logger = self.initialize_logger()
+        if self.logger:
+            self.configure_database()
 
     def initialize_logger(self):
         logger = logging.getLogger(self.pipeline_name)
+        if logger.handlers:
+            # Logger already initialized, return None
+            return None
+
         logger.setLevel(logging.INFO)
         # Configure database connection and log relevant information
-        self.configure_database()
         return logger
 
     def configure_database(self):
@@ -57,12 +62,10 @@ class PipelineLogging:
 
     def log_message(self, log_level, message, process, output):
         try:
-            timestamp = datetime.utcnow()  # Obtain the current timestamp
-            timestamp_str = timestamp.strftime("%y-%m-%d-%H-%M-%S")  # Format as string
             with self.session.begin():
                 # Perform database operations (add, update, delete)
                 log_entry = LogEntry(
-                    timestamp=timestamp_str,  # Add the formatted timestamp string
+                    timestamp=datetime.utcnow(),
                     pipeline_name=self.pipeline_name,
                     log_level=log_level,
                     process=process,
@@ -70,9 +73,5 @@ class PipelineLogging:
                     output=output
                 )
                 self.session.add(log_entry)
-            self.logger.info("Log entry added successfully.")
-        except SQLAlchemyError as e:
-            # Handle exceptions
-            self.session.rollback()
-            self.logger.error(f"Error adding log entry: {str(e)}")
-
+        except Exception as e:
+            self.logger.error(f"Error logging message: {str(e)}")
