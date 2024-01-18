@@ -23,9 +23,7 @@ def extract_load_airport_currencies(
     exchange_currency_data = exchange_api_client.get_exchange_rates()
     df_combined = pd.merge(df_airport_currencies, exchange_currency_data, on='currencyCode')
     df_combined["viewedAt"] = current_date_formatted
-    print(df_combined)
     df_combined = df_combined[['viewedAt', 'currencyCode', 'airportCode', 'value']]
-    print(df_combined)
     postgresql_client.upsert(
         data=df_combined.to_dict(orient="records"), table=table, metadata=metadata
     )

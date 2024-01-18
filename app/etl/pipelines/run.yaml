@@ -1,0 +1,16 @@
+pipelines:
+  - name: flight
+    config:
+      airport_code_reference_path: "./etl/data/flight/destinations.csv"
+    schedule:
+      run_time: "10:30"
+
+  - name: oilprice
+    schedule:
+      run_time: "10:30"
+
+  - name: exchange
+    config:
+      airport_currency_reference_path: "./etl/data/currency/airport_code_currency_mapping.csv"
+    schedule:
+      run_time: "10:30"

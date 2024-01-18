@@ -8,4 +8,4 @@ COPY requirements.txt .
 
 RUN pip install -r requirements.txt 
 
-CMD ["python", "-m", "etl.pipelines.flights"]
+CMD ["python", "-m", "etl.pipelines.run"]

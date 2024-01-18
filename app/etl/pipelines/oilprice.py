@@ -9,7 +9,8 @@ from pathlib import Path
 import schedule
 import time
 
-def run_pipeline():
+
+def run_pipeline(pipeline_config: dict):
     API_SECRET_KEY = os.environ.get("OIL_API_KEY")
     DB_USERNAME = os.environ.get("DB_USERNAME")
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -19,9 +20,7 @@ def run_pipeline():
 
     try:
         print("Creating Oil API client")
-        oilprice_api_client = OilPriceApiClient(
-            client_secret=API_SECRET_KEY
-        )
+        oilprice_api_client = OilPriceApiClient(client_secret=API_SECRET_KEY)
         postgresql_client = PostgreSqlClient(
             server_name=SERVER_NAME,
             database_name=DATABASE_NAME,
@@ -36,7 +35,7 @@ def run_pipeline():
             Column("viewedAt", String, primary_key=True),
             Column("price", String),
             Column("currency", String),
-            Column("commodity", String)
+            Column("commodity", String),
         )
         print("Extracting and loading data from Oil Price API")
         extract_load_oilprice(
@@ -59,10 +58,9 @@ if __name__ == "__main__":
         with open(yaml_file_path) as yaml_file:
             pipeline_config = yaml.safe_load(yaml_file)
             PIPELINE_NAME = pipeline_config.get("name")
-            # CONFIG = pipeline_config.get("config")
     else:
         raise Exception(
             f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
         )
 
-    run_pipeline()
+    run_pipeline(pipeline_config=pipeline_config)
