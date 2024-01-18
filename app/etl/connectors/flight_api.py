@@ -1,6 +1,6 @@
 import requests
 from time import sleep
-
+from etl.assets.pipeline_logging import PipelineLogging
 
 class FlightApiClient:
     def __init__(self, client_id, client_secret):
