@@ -7,19 +7,22 @@ from sqlalchemy.engine import URL
 import time
 from datetime import datetime
 import os
+from etl.connectors.postgresql import PostgreSqlClient
 
-#This is default properties for SQLAlchemy inheritance
+# This is default properties for SQLAlchemy inheritance
 Base = declarative_base()
 
-#logging_url = URL.create(
-''' drivername="postgresql+pg8000",
+# logging_url = URL.create(
+""" drivername="postgresql+pg8000",
     username=os.environ.get("DB_USERNAME"),
     password=os.environ.get("DB_PASSWORD"),
     host=os.environ.get("SERVER_NAME"),
     port=os.environ.get("PORT"),
     database=os.environ.get("DB_LOG_FLIGHT_NAME")
     )
-'''
+"""
+
+
 class LogEntry(Base):
     __tablename__ = "pipeline_processes"
     id = Column(Integer, primary_key=True)
@@ -31,11 +34,16 @@ class LogEntry(Base):
     output = Column(String)
 
 
-
 class PipelineLogging:
-    def __init__(self, pipeline_name: str, db_uri):
+    def __init__(
+        self,
+        pipeline_name: str,
+        postgresql_client: PostgreSqlClient,
+    ):
+        print("creating pipeline logging")
         self.pipeline_name = pipeline_name
-        self.db_uri = db_uri
+        self.postgresql_client = postgresql_client
+        self.engine = self.postgresql_client.get_engine()
         self.logger = self.initialize_logger()
         if self.logger:
             self.configure_database()
@@ -52,9 +60,8 @@ class PipelineLogging:
 
     def configure_database(self):
         try:
-            engine = create_engine(self.db_uri)
-            Base.metadata.create_all(engine)
-            Session = sessionmaker(bind=engine)
+            Base.metadata.create_all(self.engine)
+            Session = sessionmaker(bind=self.engine)
             self.session = Session()
             self.logger.info("Connected to the logging database successfully.")
         except SQLAlchemyError as e:
@@ -70,7 +77,7 @@ class PipelineLogging:
                     log_level=log_level,
                     process=process,
                     message=message,
-                    output=output
+                    output=output,
                 )
                 self.session.add(log_entry)
         except Exception as e:
