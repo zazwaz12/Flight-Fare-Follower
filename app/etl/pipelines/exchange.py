@@ -1,6 +1,6 @@
 from etl.connectors.postgresql import PostgreSqlClient
-from etl.connectors.flight_api import FlightApiClient
-from etl.assets.flight import extract_load_flights
+from etl.connectors.exchange_api import ExchangeApiClient
+from etl.assets.exchange import extract_load_airport_currencies
 from dotenv import load_dotenv
 import os
 from sqlalchemy import Table, MetaData, Column, Integer, String, Float
@@ -14,38 +14,35 @@ def run_pipeline():
     DB_USERNAME = os.environ.get("DB_USERNAME")
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
     SERVER_NAME = os.environ.get("SERVER_NAME")
-    DATABASE_NAME = os.environ.get("DATABASE_NAME")
+    DATABASE_NAME_EXCHANGE = os.environ.get("DATABASE_NAME_EXCHANGE")
     PORT = os.environ.get("PORT")
 
     try:
         print("Creating Amadeus API client")
-        flight_api_client = FlightApiClient(
-            client_id=API_KEY, client_secret=API_SECRET_KEY
+        exchange_api_client = ExchangeApiClient(
+            client_id=EXCHANGE_KEY
         )
         postgresql_client = PostgreSqlClient(
             server_name=SERVER_NAME,
-            database_name=DATABASE_NAME,
+            database_name=DATABASE_NAME_EXCHANGE,
             username=DB_USERNAME,
             password=DB_PASSWORD,
             port=PORT,
         )
         metadata = MetaData()
         table = Table(
-            "flight_price",
+            "exchange_price",
             metadata,
             Column("viewedAt", String, primary_key=True),
-            Column("origin", String, primary_key=True),
-            Column("destination", String, primary_key=True),
-            Column("duration", Integer, primary_key=True),
-            Column("departureDate", String, primary_key=True),
-            Column("returnDate", String, primary_key=True),
-            Column("cheapestPrice", String),
+            Column("currencyCode", String, primary_key=True),
+            Column("airport", String, primary_key=True),
+            Column("value", Float, primary_key=True),
         )
-        print("Extracting and loading data from Amadeus API")
-        extract_load_flights(
-            flight_api_client=flight_api_client,
+        print("Extracting and loading data from ExchangeAPI ")
+        extract_load_airport_currencies(
+            exchange_api_client=exchange_api_client,
             postgresql_client=postgresql_client,
-            airport_codes_reference_path=CONFIG.get("airport_code_reference_path"),
+            airport_currency_reference_path=CONFIG.get("airport_currency_reference_path"),
             table=table,
             metadata=metadata,
         )

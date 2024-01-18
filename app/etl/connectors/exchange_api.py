@@ -1,5 +1,6 @@
 import requests
 import json
+import pandas as pd
 
 class ExchangeApiClient:
     def __init__(self, api_key):
@@ -17,7 +18,12 @@ class ExchangeApiClient:
             response.raise_for_status()  # Raise an exception for HTTP errors
             #to change it from a json formatted string to a json object
             data = json.loads(response.text)
-            return data["exchange_rates"]
+            #to pivot table the pandas df
+            # Use json_normalize to flatten the nested structure
+            df_normalized = pd.json_normalize(data["exchange_rates"])
+            # Use pd.melt to reshape the DataFrame - pivots on currency
+            melted_df = pd.melt(df_normalized, var_name="currencyCode", value_name="Value")
+            return melted_df
         except requests.exceptions.RequestException as e:
             print(f"Error fetching exchange rates: {e}")
             return None
