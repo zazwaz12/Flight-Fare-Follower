@@ -10,6 +10,7 @@ import schedule
 import time
 import logging
 import pdb
+from etl.assets.pipeline_logging import PipelineLogging
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -61,6 +62,16 @@ def run_pipeline():
 
 if __name__ == "__main__":
     load_dotenv()
+    from sqlalchemy.engine import URL
+    
+    LOGGING_CONNECTION_URL = URL.create(
+    drivername="postgresql+pg8000",
+    username=os.environ.get("DB_USERNAME"),
+    password=os.environ.get("DB_PASSWORD"),
+    host=os.environ.get("SERVER_NAME"),
+    port=os.environ.get("PORT"),
+    database=os.environ.get("DB_LOG_FLIGHT_NAME")
+    )
 
     # get config variables
     yaml_file_path = __file__.replace(".py", ".yaml")
@@ -69,6 +80,11 @@ if __name__ == "__main__":
             pipeline_config = yaml.safe_load(yaml_file)
             PIPELINE_NAME = pipeline_config.get("name")
             CONFIG = pipeline_config.get("config")
+            print(PIPELINE_NAME)
+
+        
+            flightLogger = PipelineLogging(PIPELINE_NAME, LOGGING_CONNECTION_URL)
+            flightLogger.log_message(logging.INFO, message="The logging is set up on flight.py", process="Logging Set-UP", output="SUCCESS.")
     else:
         raise Exception(
             f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
