@@ -35,9 +35,9 @@ if __name__ == "__main__":
             f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
         )
 
-    while True:
-        for pipeline_config in multi_pipeline_config.get("pipelines"):
-            pipeline_name = pipeline_config.get("name")
-            module = import_module(name=f".{pipeline_name}", package="etl.pipelines")
-            module.run_pipeline(pipeline_config=pipeline_config)
-        time.sleep(15)
+    # while True:
+    for pipeline_config in multi_pipeline_config.get("pipelines"):
+        pipeline_name = pipeline_config.get("name")
+        module = import_module(name=f".{pipeline_name}", package="etl.pipelines")
+        module.run_pipeline(pipeline_config=pipeline_config)
+    # time.sleep(15)
