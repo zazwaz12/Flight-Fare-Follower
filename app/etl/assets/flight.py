@@ -15,7 +15,20 @@ def extract_load_flights(
     metadata: MetaData,
 ) -> pd.DataFrame:
     """
-    Perform extraction using a filepath which contains a list of cities.
+    This function extracts and loads flight data using a Flight API client and a PostgreSQL client.
+    It reads a list of airport codes from a CSV file, fetches flight prices for various durations
+    using the Flight API, and then upserts this data into a specified PostgreSQL database table.
+
+    Parameters:
+        flight_api_client (FlightApiClient): An instance of FlightApiClient to fetch flight data.
+        postgresql_client (PostgreSqlClient): An instance of PostgreSqlClient for database operations.
+        airport_codes_reference_path (Path): The file path to the CSV containing airport codes.
+        table (Table): The SQLAlchemy table object where data will be upserted.
+        metadata (MetaData): The SQLAlchemy MetaData object associated with the database.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the compiled flight data, including origins, destinations,
+                      departure and return dates, duration, and prices.
     """
     df_airport_codes = pd.read_csv(airport_codes_reference_path)
     current_date = datetime.now()
@@ -25,7 +38,7 @@ def extract_load_flights(
     days_later_120 = current_date + timedelta(days=120)
     days_later_120_formatted = days_later_120.strftime("%Y-%m-%d")
     duration_from = 9
-    duration_to = 9#15
+    duration_to = 9  # 15
 
     flight_data = []
     for code in df_airport_codes["airport_code"]:
