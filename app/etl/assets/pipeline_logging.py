@@ -1,26 +1,13 @@
 import logging
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.engine import URL
-import time
 from datetime import datetime
-import os
 from etl.connectors.postgresql import PostgreSqlClient
 
 # This is default properties for SQLAlchemy inheritance
 Base = declarative_base()
-
-# logging_url = URL.create(
-""" drivername="postgresql+pg8000",
-    username=os.environ.get("DB_USERNAME"),
-    password=os.environ.get("DB_PASSWORD"),
-    host=os.environ.get("SERVER_NAME"),
-    port=os.environ.get("PORT"),
-    database=os.environ.get("DB_LOG_FLIGHT_NAME")
-    )
-"""
 
 
 class LogEntry(Base):
@@ -40,7 +27,6 @@ class PipelineLogging:
         pipeline_name: str,
         postgresql_client: PostgreSqlClient,
     ):
-        print("creating pipeline logging")
         self.pipeline_name = pipeline_name
         self.postgresql_client = postgresql_client
         self.engine = self.postgresql_client.get_engine()
