@@ -3,15 +3,27 @@ from etl.connectors.oilprice_api import OilPriceApiClient
 from etl.assets.oilprice import extract_load_oilprice
 from dotenv import load_dotenv
 import os
-from sqlalchemy import Table, MetaData, Column, Integer, String, Float
+from sqlalchemy import Table, MetaData, Column, String
 import yaml
 from pathlib import Path
-import schedule
-import time
 from etl.assets.pipeline_logging import PipelineLogging
 
 
 def run_pipeline(pipeline_config: dict):
+    """
+    Executes the data extraction and loading pipeline for oil prices.
+
+    The function initializes by loading environment variables, then sets up clients for the database and the Oil Price API.
+    It reads the pipeline configuration from a YAML file, establishes a logger, and defines the database table schema.
+    The extraction and loading process is then executed, with exception handling included.
+
+    Args:
+        pipeline_config (dict): A dictionary containing pipeline configuration details.
+
+    Raises:
+        Exception: If the YAML configuration file is missing.
+        BaseException: For any exceptions raised during the pipeline execution.
+    """
     load_dotenv()
 
     API_SECRET_KEY = os.environ.get("OIL_API_KEY")
@@ -35,14 +47,8 @@ def run_pipeline(pipeline_config: dict):
         with open(yaml_file_path) as yaml_file:
             pipeline_config = yaml.safe_load(yaml_file)
             PIPELINE_NAME = pipeline_config.get("name")
-            oilLogger = PipelineLogging(
+            logger = PipelineLogging(
                 pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
-            )
-            oilLogger.log_message(
-                print,
-                message="The logging is set up on oilprice.py",
-                process="Logging Set-UP",
-                output="SUCCESS.",
             )
     else:
         raise Exception(
@@ -50,8 +56,19 @@ def run_pipeline(pipeline_config: dict):
         )
 
     try:
-        print("Creating Oil API client")
+        logger.log_message(
+            print,
+            message="Accessing Oil Price API client",
+            process="[Oil] Oil Price API Setup",
+            output="START",
+        )
         oilprice_api_client = OilPriceApiClient(client_secret=API_SECRET_KEY)
+        logger.log_message(
+            print,
+            message="Accessing Oil Price API client",
+            process="[Oil] Oil Price API Setup",
+            output="SUCCESS",
+        )
 
         metadata = MetaData()
         table = Table(
@@ -62,14 +79,29 @@ def run_pipeline(pipeline_config: dict):
             Column("currency", String),
             Column("commodity", String),
         )
-        print("Extracting and loading data from Oil Price API")
 
+        logger.log_message(
+            print,
+            message="Extracting and loading data from Oil Price API",
+            process="[Oil] Oil Price Extract and Load",
+            output="START",
+        )
         extract_load_oilprice(
             oilprice_api_client=oilprice_api_client,
             postgresql_client=postgresql_client,
             table=table,
             metadata=metadata,
         )
-        print("Pipeline run successful")
+        logger.log_message(
+            print,
+            message="Extracting and loading data from Oil Price API",
+            process="[Oil] Oil Price Extract and Load",
+            output="SUCCESS",
+        )
     except BaseException as e:
-        print(f"Pipeline run failed. See detailed logs: {e}")
+        logger.log_message(
+            print,
+            message=f"Oil Price API EL pipeline run failed. See detailed logs: {e}",
+            process="[Oil] EL Pipeline Failed",
+            output="FAIL",
+        )

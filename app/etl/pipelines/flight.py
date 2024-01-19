@@ -3,19 +3,27 @@ from etl.connectors.flight_api import FlightApiClient
 from etl.assets.flight import extract_load_flights
 from dotenv import load_dotenv
 import os
-from sqlalchemy import Table, MetaData, Column, Integer, String, Float
+from sqlalchemy import Table, MetaData, Column, Integer, String
 import yaml
 from pathlib import Path
-import schedule
-import time
-import logging
-import pdb
 from etl.assets.pipeline_logging import PipelineLogging
-
-# logging.basicConfig(level=print, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 def run_pipeline(pipeline_config: dict):
+    """
+    Executes the data extraction and loading pipeline.
+
+    It starts by loading environment variables, then initializes clients for the database and the Amadeus API.
+    The function also reads the pipeline configuration from a YAML file, sets up a logger, and defines the
+    database table schema. Finally, it runs the extraction and loading process and handles any exceptions.
+
+    Args:
+        pipeline_config (dict): A dictionary containing pipeline configuration details.
+
+    Raises:
+        Exception: If the YAML configuration file is missing.
+        BaseException: For any exceptions raised during the pipeline execution.
+    """
     load_dotenv()
 
     API_KEY = os.environ.get("API_KEY")
@@ -42,14 +50,8 @@ def run_pipeline(pipeline_config: dict):
             pipeline_config = yaml.safe_load(yaml_file)
             PIPELINE_NAME = pipeline_config.get("name")
 
-            flightLogger = PipelineLogging(
+            logger = PipelineLogging(
                 pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
-            )
-            flightLogger.log_message(
-                print,
-                message="The logging is set up on flight.py",
-                process="Logging Set-UP",
-                output="SUCCESS.",
             )
     else:
         raise Exception(
@@ -57,12 +59,22 @@ def run_pipeline(pipeline_config: dict):
         )
 
     try:
-        DATABASE_NAME = os.environ.get("DB_LOG_FLIGHT_NAME")
-
-        print("Creating Amadeus API client")
+        logger.log_message(
+            print,
+            message="Accessing Amadeus API client",
+            process="[Amadeus] Amadeus API Setup",
+            output="START",
+        )
 
         flight_api_client = FlightApiClient(
             client_id=API_KEY, client_secret=API_SECRET_KEY
+        )
+
+        logger.log_message(
+            print,
+            message="Accessing Amadeus API client",
+            process="[Amadeus] Amadeus API Setup",
+            output="SUCCESS",
         )
 
         metadata = MetaData()
@@ -77,8 +89,12 @@ def run_pipeline(pipeline_config: dict):
             Column("returnDate", String, primary_key=True),
             Column("cheapestPrice", String),
         )
-        print("Extracting and loading data from Amadeus API")
-
+        logger.log_message(
+            print,
+            message="Extracting and loading data from Amadeus API",
+            process="[Amadeus] Extract and Load",
+            output="START",
+        )
         extract_load_flights(
             flight_api_client=flight_api_client,
             postgresql_client=postgresql_client,
@@ -88,6 +104,16 @@ def run_pipeline(pipeline_config: dict):
             table=table,
             metadata=metadata,
         )
-        print("Pipeline run successful")
+        logger.log_message(
+            print,
+            message="Extracting and loading data from Amadeus API",
+            process="[Amadeus] Extract and Load",
+            output="START",
+        )
     except BaseException as e:
-        print(f"Pipeline run failed. See detailed logs: {e}")
+        logger.log_message(
+            print,
+            message=f"Amadeus API EL pipeline run failed. See detailed logs: {e}",
+            process="[Amadeus] EL Pipeline Failed",
+            output="FAIL",
+        )

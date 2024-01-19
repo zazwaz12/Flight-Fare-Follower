@@ -8,6 +8,22 @@ from dotenv import load_dotenv
 from importlib import import_module
 
 if __name__ == "__main__":
+    """
+    This script is designed to continuously run multiple data extraction and loading pipelines.
+    It reads the configurations for each pipeline from a YAML file and executes them in a loop.
+
+    The script starts by loading environment variables, then reads the pipeline configurations from
+    the YAML file. For each pipeline, it dynamically imports the corresponding module and executes
+    its `run_pipeline` function. The process repeats in a continuous loop with a specified sleep
+    interval between each iteration.
+
+    Raises:
+        Exception: If the YAML configuration file is missing or cannot be found.
+
+    Example:
+        To run this script, simply execute it in a Python environment where the required modules
+        and packages are installed. Ensure that the YAML configuration file for the pipelines is
+        present in the same directory as this script."""
     load_dotenv()
     # get config variables
     yaml_file_path = __file__.replace(".py", ".yaml")
@@ -21,7 +37,6 @@ if __name__ == "__main__":
 
     while True:
         for pipeline_config in multi_pipeline_config.get("pipelines"):
-            print("run pipeline")
             pipeline_name = pipeline_config.get("name")
             module = import_module(name=f".{pipeline_name}", package="etl.pipelines")
             module.run_pipeline(pipeline_config=pipeline_config)

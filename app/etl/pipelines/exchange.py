@@ -3,15 +3,27 @@ from etl.connectors.exchange_api import ExchangeApiClient
 from etl.assets.exchange import extract_load_airport_currencies
 from dotenv import load_dotenv
 import os
-from sqlalchemy import Table, MetaData, Column, Integer, String, Float
+from sqlalchemy import Table, MetaData, Column, String, Float
 import yaml
 from pathlib import Path
-import schedule
-import time
 from etl.assets.pipeline_logging import PipelineLogging
 
 
 def run_pipeline(pipeline_config: dict):
+    """
+    Executes the data extraction and loading pipeline for airport exchange rates.
+
+    The function starts by loading environment variables, then it sets up clients for the database and the Exchange API.
+    It reads the pipeline configuration from a YAML file, sets up a logger, and defines the database table schema.
+    The extraction and loading process is executed, with appropriate logging and exception handling.
+
+    Args:
+        pipeline_config (dict): A dictionary containing pipeline configuration details.
+
+    Raises:
+        Exception: If the YAML configuration file is missing.
+        BaseException: For any exceptions raised during the pipeline execution.
+    """
     load_dotenv()
     EXCHANGE_KEY = os.environ.get("EXCHANGE_KEY")
     DB_USERNAME = os.environ.get("DB_USERNAME")
@@ -34,14 +46,8 @@ def run_pipeline(pipeline_config: dict):
         with open(yaml_file_path) as yaml_file:
             pipeline_config = yaml.safe_load(yaml_file)
             PIPELINE_NAME = pipeline_config.get("name")
-            flightLogger = PipelineLogging(
+            logger = PipelineLogging(
                 pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
-            )
-            flightLogger.log_message(
-                print,
-                message="The logging is set up on flight.py",
-                process="Logging Set-UP",
-                output="SUCCESS.",
             )
     else:
         raise Exception(
@@ -49,9 +55,19 @@ def run_pipeline(pipeline_config: dict):
         )
 
     try:
-        print("Creating Exchange API client")
+        logger.log_message(
+            print,
+            message="Accessing Exchange API client",
+            process="[Exchange] Exchange API Setup",
+            output="START",
+        )
         exchange_api_client = ExchangeApiClient(api_key=EXCHANGE_KEY)
-
+        logger.log_message(
+            print,
+            message="Accessing Exchange API client",
+            process="[Exchange] Exchange API Setup",
+            output="SUCCESS",
+        )
         metadata = MetaData()
         table = Table(
             "exchange_price",
@@ -61,8 +77,13 @@ def run_pipeline(pipeline_config: dict):
             Column("airportCode", String, primary_key=False),
             Column("value", Float, primary_key=False),
         )
-        print("Extracting and loading data from ExchangeAPI ")
 
+        logger.log_message(
+            print,
+            message="Extracting and loading data from Exchange API",
+            process="[Exchange] Extract and Load",
+            output="START",
+        )
         extract_load_airport_currencies(
             exchange_api_client=exchange_api_client,
             postgresql_client=postgresql_client,
@@ -72,6 +93,16 @@ def run_pipeline(pipeline_config: dict):
             table=table,
             metadata=metadata,
         )
-        print("Pipeline run successful")
+        logger.log_message(
+            print,
+            message="Extracting and loading data from Exchange API",
+            process="[Exchange] Extract and Load",
+            output="SUCCESS",
+        )
     except BaseException as e:
-        print(f"Pipeline run failed. See detailed logs: {e}")
+        logger.log_message(
+            print,
+            message=f"Exchange API EL pipeline run failed. See detailed logs: {e}",
+            process="[Exchange] EL Pipeline Failed",
+            output="FAIL",
+        )
