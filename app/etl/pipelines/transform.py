@@ -61,12 +61,30 @@ def run_pipeline(pipeline_config: dict):
             postgresql_client=postgresql_client,
             environment=transform_template_environment,
         )
+        serving_flight_price_exchange_rate = SqlTransform(
+            table_name="serving_flight_price_exchange_rate",
+            postgresql_client=postgresql_client,
+            environment=transform_template_environment,
+        )
+        serving_flight_price_oil_price = SqlTransform(
+            table_name="serving_flight_price_oil_price",
+            postgresql_client=postgresql_client,
+            environment=transform_template_environment,
+        )
+        serving_min_max_flight_HKG = SqlTransform(
+            table_name="serving_min_max_flight_HKG",
+            postgresql_client=postgresql_client,
+            environment=transform_template_environment,
+        )
 
         # create DAG
         dag = TopologicalSorter()
         dag.add(staging_flights)
         dag.add(serving_avg_price_dow, staging_flights)
         dag.add(serving_avg_price_month, staging_flights)
+        dag.add(serving_flight_price_exchange_rate)
+        dag.add(serving_flight_price_oil_price)
+        dag.add(serving_min_max_flight_HKG)
 
         logger.log_message(
             print,
