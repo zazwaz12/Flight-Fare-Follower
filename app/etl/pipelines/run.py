@@ -1,11 +1,9 @@
-import os
 import yaml
 from pathlib import Path
-import schedule
-import time
-from etl.connectors.postgresql import PostgreSqlClient
 from dotenv import load_dotenv
 from importlib import import_module
+from jinja2 import Environment, FileSystemLoader
+
 
 if __name__ == "__main__":
     """
@@ -40,4 +38,5 @@ if __name__ == "__main__":
         pipeline_name = pipeline_config.get("name")
         module = import_module(name=f".{pipeline_name}", package="etl.pipelines")
         module.run_pipeline(pipeline_config=pipeline_config)
+
     # time.sleep(15)
