@@ -16,6 +16,7 @@ class PostgreSqlClient:
         password: str,
         port: int = 5432,
     ):
+        super().__init__()
         self.host_name = server_name
         self.database_name = database_name
         self.username = username
