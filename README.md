@@ -15,8 +15,7 @@ Who will benefit most from this dataset, and what are their data interaction pre
 
 What questions are you trying to answer with your data? How will your data support your users?
 
-- What are the cheapest countries to visit during December?
-- What are the best days to fly on?
+- What are the best day of the week or months to fly on?
 - What is the correlation between exchange rate and flight prices?
 - What are the effects of oil prices on flight prices?
 - What is the most expensive / cheapest price to Hong Kong if I were to spend 9 days?
