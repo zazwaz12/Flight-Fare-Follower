@@ -31,7 +31,7 @@ def extract_load_flights(
         pd.DataFrame: A DataFrame containing the compiled flight data, including origins, destinations,
                       departure and return dates, duration, and prices.
     """
-    console_logger = ConsoleLogging(pipeline_name="flight")
+    console_logger = ConsoleLogging(pipeline_name="flight_internal")
     df_airport_codes = pd.read_csv(airport_codes_reference_path)
     current_date = datetime.now()
     current_date_formatted = current_date.strftime("%Y-%m-%d")

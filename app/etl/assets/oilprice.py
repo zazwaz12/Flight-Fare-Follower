@@ -29,7 +29,7 @@ def extract_load_oilprice(
         pd.DataFrame: A DataFrame containing the normalized oil price data.
 
     """
-    console_logger = ConsoleLogging(pipeline_name="oilprice")
+    console_logger = ConsoleLogging(pipeline_name="oilprice_internal")
     current_date = datetime.now()
     current_date_formatted = current_date.strftime("%Y-%m-%d")
     console_logger.logger.info(f"Getting oil prices...")

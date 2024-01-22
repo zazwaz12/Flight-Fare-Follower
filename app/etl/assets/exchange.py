@@ -30,7 +30,7 @@ def extract_load_airport_currencies(
     Returns:
         pd.DataFrame: A DataFrame containing the combined data of airport currencies and their latest exchange rates.
     """
-    console_logger = ConsoleLogging(pipeline_name="exchange")
+    console_logger = ConsoleLogging(pipeline_name="exchange_internal")
     df_airport_currencies = pd.read_csv(airport_currency_reference_path)
     current_date = datetime.now()
     current_date_formatted = current_date.strftime("%Y-%m-%d")
