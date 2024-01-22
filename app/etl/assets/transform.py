@@ -60,6 +60,7 @@ def transform(dag: TopologicalSorter) -> None:
         dag (TopologicalSorter): A directed acyclic graph (DAG) of SqlTransform nodes representing
                                  the dependencies between different SQL transformations.
     """
+
     dag_rendered = tuple(dag.static_order())
     for node in dag_rendered:
         node.create_table_as()

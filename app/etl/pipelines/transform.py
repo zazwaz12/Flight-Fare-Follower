@@ -7,6 +7,7 @@ import yaml
 from pathlib import Path
 from etl.assets.pipeline_logging import PipelineLogging
 from graphlib import TopologicalSorter
+from etl.assets.console_logging import ConsoleLogging
 
 
 def run_pipeline(pipeline_config: dict):
@@ -35,6 +36,7 @@ def run_pipeline(pipeline_config: dict):
             logger = PipelineLogging(
                 pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
             )
+            console_logger = ConsoleLogging(pipeline_name=PIPELINE_NAME)
     else:
         raise Exception(
             f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
@@ -92,10 +94,12 @@ def run_pipeline(pipeline_config: dict):
             process="[Transform] Transform data",
             output="START",
         )
+        console_logger.logger.info("Transform data from all APIs...")
 
         # run transform
         transform(dag=dag)
 
+        console_logger.logger.info("Transform data from all APIs... done!")
         logger.log_message(
             print,
             message="Transform data from all APIs",

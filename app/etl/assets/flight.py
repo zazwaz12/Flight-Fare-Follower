@@ -3,6 +3,7 @@ from pathlib import Path
 from sqlalchemy import Table, MetaData
 from etl.connectors.postgresql import PostgreSqlClient
 from etl.connectors.flight_api import FlightApiClient
+from etl.assets.console_logging import ConsoleLogging
 from datetime import datetime, timedelta
 import time
 
@@ -30,6 +31,7 @@ def extract_load_flights(
         pd.DataFrame: A DataFrame containing the compiled flight data, including origins, destinations,
                       departure and return dates, duration, and prices.
     """
+    console_logger = ConsoleLogging(pipeline_name="flight")
     df_airport_codes = pd.read_csv(airport_codes_reference_path)
     current_date = datetime.now()
     current_date_formatted = current_date.strftime("%Y-%m-%d")
@@ -38,16 +40,22 @@ def extract_load_flights(
     days_later_120 = current_date + timedelta(days=120)
     days_later_120_formatted = days_later_120.strftime("%Y-%m-%d")
     duration_from = 9
-    duration_to = 9  # 15
+    duration_to = 15
 
     flight_data = []
     for code in df_airport_codes["airport_code"]:
-        for duration in range(duration_from, duration_to + 1):
+        for d in range(duration_from, duration_to + 1):
+            console_logger.logger.info(
+                f"Getting flight prices for {code} from {next_day_formatted} to {days_later_120_formatted} for {d} days..."
+            )
             flight_response_data = flight_api_client.get_prices(
                 destination=code,
                 departure_date_from=next_day_formatted,
                 departure_date_to=days_later_120_formatted,
-                duration=duration,
+                duration=d,
+            )
+            console_logger.logger.info(
+                f"Getting flight prices for {code} from {next_day_formatted} to {days_later_120_formatted} for {d} days... done!"
             )
             flight_data.extend(
                 [
@@ -55,7 +63,7 @@ def extract_load_flights(
                         "viewedAt": current_date_formatted,
                         "origin": entry.get("origin"),
                         "destination": entry.get("destination"),
-                        "duration": duration,
+                        "duration": d,
                         "departureDate": entry.get("departureDate"),
                         "returnDate": entry.get("returnDate"),
                         "cheapestPrice": entry.get("price", {}).get("total"),
@@ -63,10 +71,12 @@ def extract_load_flights(
                     for entry in flight_response_data
                 ]
             )
-            time.sleep(1)  # Pausing for a seconds between each API call
+            time.sleep(1)  # Pausing for a second between each API call
 
     df_flights = pd.json_normalize(flight_data)
+    console_logger.logger.info(f"Upserting flight prices data...")
     postgresql_client.upsert(
         data=df_flights.to_dict(orient="records"), table=table, metadata=metadata
     )
+    console_logger.logger.info(f"Upserting flight prices data... done!")
     return df_flights

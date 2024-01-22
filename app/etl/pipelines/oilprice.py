@@ -7,6 +7,7 @@ from sqlalchemy import Table, MetaData, Column, String
 import yaml
 from pathlib import Path
 from etl.assets.pipeline_logging import PipelineLogging
+from etl.assets.console_logging import ConsoleLogging
 
 
 def run_pipeline(pipeline_config: dict):
@@ -50,6 +51,7 @@ def run_pipeline(pipeline_config: dict):
             logger = PipelineLogging(
                 pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
             )
+            console_logger = ConsoleLogging(pipeline_name=PIPELINE_NAME)
     else:
         raise Exception(
             f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
@@ -62,6 +64,7 @@ def run_pipeline(pipeline_config: dict):
             process="[Oil] Oil Price API Setup",
             output="START",
         )
+        console_logger.logger.info("Accessing Oil Price API client starting...")
         oilprice_api_client = OilPriceApiClient(client_secret=API_SECRET_KEY)
         logger.log_message(
             print,
@@ -69,6 +72,7 @@ def run_pipeline(pipeline_config: dict):
             process="[Oil] Oil Price API Setup",
             output="SUCCESS",
         )
+        console_logger.logger.info("Accessing Oil Price API client done!")
 
         metadata = MetaData()
         table = Table(
@@ -86,6 +90,9 @@ def run_pipeline(pipeline_config: dict):
             process="[Oil] Oil Price Extract and Load",
             output="START",
         )
+        console_logger.logger.info(
+            "Extracting and loading data from Oil Price API starting..."
+        )
         extract_load_oilprice(
             oilprice_api_client=oilprice_api_client,
             postgresql_client=postgresql_client,
@@ -97,6 +104,9 @@ def run_pipeline(pipeline_config: dict):
             message="Extracting and loading data from Oil Price API",
             process="[Oil] Oil Price Extract and Load",
             output="SUCCESS",
+        )
+        console_logger.logger.info(
+            "Extracting and loading data from Oil Price API done!"
         )
     except BaseException as e:
         logger.log_message(

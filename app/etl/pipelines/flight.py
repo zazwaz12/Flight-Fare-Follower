@@ -7,6 +7,7 @@ from sqlalchemy import Table, MetaData, Column, Integer, String
 import yaml
 from pathlib import Path
 from etl.assets.pipeline_logging import PipelineLogging
+from etl.assets.console_logging import ConsoleLogging
 
 
 def run_pipeline(pipeline_config: dict):
@@ -53,6 +54,7 @@ def run_pipeline(pipeline_config: dict):
             logger = PipelineLogging(
                 pipeline_name=PIPELINE_NAME, postgresql_client=postgresql_client
             )
+            console_logger = ConsoleLogging(pipeline_name=PIPELINE_NAME)
     else:
         raise Exception(
             f"Missing {yaml_file_path} file! Please create the yaml file with at least a `name` key for the pipeline name."
@@ -65,6 +67,7 @@ def run_pipeline(pipeline_config: dict):
             process="[Amadeus] Amadeus API Setup",
             output="START",
         )
+        console_logger.logger.info("Accessing Amadeus API client starting...")
 
         flight_api_client = FlightApiClient(
             client_id=API_KEY, client_secret=API_SECRET_KEY
@@ -76,6 +79,7 @@ def run_pipeline(pipeline_config: dict):
             process="[Amadeus] Amadeus API Setup",
             output="SUCCESS",
         )
+        console_logger.logger.info("Accessing Amadeus API client done!")
 
         metadata = MetaData()
         table = Table(
@@ -95,6 +99,9 @@ def run_pipeline(pipeline_config: dict):
             process="[Amadeus] Extract and Load",
             output="START",
         )
+        console_logger.logger.info(
+            "Extracting and loading data from Amadeus API starting..."
+        )
         extract_load_flights(
             flight_api_client=flight_api_client,
             postgresql_client=postgresql_client,
@@ -110,6 +117,7 @@ def run_pipeline(pipeline_config: dict):
             process="[Amadeus] Extract and Load",
             output="START",
         )
+        console_logger.logger.info("Extracting and loading data from Amadeus API done!")
     except BaseException as e:
         logger.log_message(
             print,
