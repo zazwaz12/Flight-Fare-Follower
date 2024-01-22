@@ -32,14 +32,14 @@ class FlightApiClient:
                 self.access_token = response.json()["access_token"]
                 break  # Exit the loop if the request was successful
             except requests.exceptions.RequestException as e:
-                print(f"Request failed: {e}")
+               # print(f"Request failed: {e}")
                 if attempt < max_retries - 1:
-                    print(f"Retrying in {retry_delay} seconds...")
+                    #print(f"Retrying in {retry_delay} seconds...")
                     sleep(retry_delay)
+                    print(e)
                 else:
-                    raise Exception(
-                        "Failed to retrieve access token after multiple attempts."
-                    )
+                    return str(e)
+
 
     def get_prices(
         self,
