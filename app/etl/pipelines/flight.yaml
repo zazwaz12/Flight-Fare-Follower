@@ -1,5 +1,3 @@
 name: flight
 config:
   airport_code_reference_path: "./etl/data/flight/destinations.csv"
-schedule:
-  run_time: "10:30"

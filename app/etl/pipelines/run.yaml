@@ -1,12 +1,8 @@
 pipelines:
   - name: flight
-    config:
-      airport_code_reference_path: "./etl/data/flight/destinations.csv"
 
   - name: oilprice
 
   - name: exchange
-    config:
-      airport_currency_reference_path: "./etl/data/currency/airport_code_currency_mapping.csv"
 
   - name: transform

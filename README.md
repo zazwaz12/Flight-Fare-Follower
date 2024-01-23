@@ -22,30 +22,15 @@ What questions are you trying to answer with your data? How will your data suppo
 
 ## Source datasets
 
-What datasets are you sourcing from? How frequently are the source datasets updating?
-
-- TBD
-
-Example:
-
-| Source name        | Source type         | Source documentation |
-| ------------------ | ------------------- | -------------------- |
-| Customers database | PostgreSQL database | -                    |
-| Orders API         | REST API            | -                    |
+| Source name       | Source type | Source documentation                                  |
+| ----------------- | ----------- | ----------------------------------------------------- |
+| Amadeus API       | REST API    | https://developers.amadeus.com/self-service/apis-docs |
+| Oilprice API      | REST API    | https://docs.oilpriceapi.com/                         |
+| Exchange Rate API | REST API    | https://docs.abstractapi.com/exchange-rates           |
 
 ## Solution architecture
 
-How are we going to get data flowing from source to serving? What components and services will we combine to implement the solution? How do we automate the entire running of the solution?
-
-- What data extraction patterns are you going to be using?
-- What data loading patterns are you going to be using?
-- What data transformation patterns are you going to be performing?
-
-We recommend using a diagramming tool like [draw.io](https://draw.io/) to create your architecture diagram.
-
-Here is a sample solution architecture diagram:
-
-![images/sample-solution-architecture-diagram.png](images/sample-solution-architecture-diagram.png)
+![images/solution_architecture.png](images/solution_architecture.png)
 
 ## Breakdown of tasks
 
@@ -55,7 +40,7 @@ How is your project broken down? Who is doing what?
   - setup for api call of flight data (1/15, done)
   - extract and load part of flight data (1/15, done)
   - docker setup (1/18, done)
-  - transform (TODO: 1/22)
+  - transform (1/22, done)
 - Tim:
   - setup for api call of exchange rate data (1/15, done)
   - logging (1/18, done)
@@ -64,5 +49,13 @@ How is your project broken down? Who is doing what?
 - Ahmed:
   - setup for api call of oil prices (1/15, done)
   - extract and load of oil price and/or exchange rate data (1/18, done)
-  - transform (TODO: 1/18)
-  - AWS (TODO: later)
+  - transform (1/18, done)
+  - AWS (1/22, done)
+
+# Lessons Learnt
+
+- Orchestrating whole project using OOP
+- Working as a team in GitHub, with different tasks assigned to each
+- Integrating code logic all together
+- Technicalities with unit testing, pipeline logging, and ELT building
+- Integrating Amadeus API full of bugs
