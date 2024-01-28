@@ -31,31 +31,3 @@ What questions are you trying to answer with your data? How will your data suppo
 ## Solution architecture
 
 ![images/solution_architecture.png](images/solution_architecture.png)
-
-## Breakdown of tasks
-
-How is your project broken down? Who is doing what?
-
-- Justin:
-  - setup for api call of flight data (1/15, done)
-  - extract and load part of flight data (1/15, done)
-  - docker setup (1/18, done)
-  - transform (1/22, done)
-- Tim:
-  - setup for api call of exchange rate data (1/15, done)
-  - logging (1/18, done)
-  - unit tests (1/18, done)
-  - transform (TODO: 1/22)
-- Ahmed:
-  - setup for api call of oil prices (1/15, done)
-  - extract and load of oil price and/or exchange rate data (1/18, done)
-  - transform (1/18, done)
-  - AWS (1/22, done)
-
-# Lessons Learnt
-
-- Orchestrating whole project using OOP
-- Working as a team in GitHub, with different tasks assigned to each
-- Integrating code logic all together
-- Technicalities with unit testing, pipeline logging, and ELT building
-- Integrating Amadeus API full of bugs
